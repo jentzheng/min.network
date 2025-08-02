@@ -1,0 +1,10 @@
+BasedOnStyle: WebKit
+SortIncludes: false
+ColumnLimit: 0
+UseTab: ForContinuationAndIndentation
+TabWidth: 4
+
+
+StatementMacros:
+  - MIN_ARGUMENT_FUNCTION
+  - MIN_FUNCTION
