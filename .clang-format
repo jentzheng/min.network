@@ -1,10 +1,14 @@
 BasedOnStyle: WebKit
 SortIncludes: false
 ColumnLimit: 0
-UseTab: ForContinuationAndIndentation
+UseTab: Never
 TabWidth: 4
 
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
 
 StatementMacros:
   - MIN_ARGUMENT_FUNCTION
   - MIN_FUNCTION
+

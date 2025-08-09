@@ -5,20 +5,22 @@
 ///	@license	Use of this source code is governed by the MIT License
 /// found in the License.md file.
 
-#include "c74_min_unittest.h"       // required unit test header
-#include "jit.bridge.webrtc.cpp"    // need the source of our object so that we can access it
+#include "c74_min_unittest.h" // required unit test header
+#include "min.network.webrtc.cpp" // need the source of our object so that we can access it
 
 // Unit tests are written using the Catch framework as described at
 // https://github.com/philsquared/Catch/blob/master/docs/tutorial.md
 
-SCENARIO("object produces correct output") {
-	ext_main(nullptr);    // every unit test must call ext_main() once to configure
-						  // the class
+SCENARIO("object produces correct output")
+{
+	ext_main(nullptr); // every unit test must call ext_main() once to configure
+					   // the class
 
-	GIVEN("An instance of our object") {
+	GIVEN("An instance of our object")
+	{
 
 		test_wrapper<webrtc> an_instance;
-		webrtc&              my_object = an_instance;
+		webrtc& my_object = an_instance;
 
 		// check that default attr values are correct
 		// REQUIRE((my_object.greeting == symbol("hello world")));

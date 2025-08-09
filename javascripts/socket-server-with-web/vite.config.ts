@@ -1,17 +1,22 @@
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import basicSsl from "@vitejs/plugin-basic-ssl";
 import createSocketIOServer from "./socketIO";
+import websocketServer from "./wsserver";
 
-function SocketIOServerPlugin(): Plugin {
+function WebsocketPlugin(): Plugin {
   return {
-    name: "websocket-middleware",
+    name: "custom-websocket",
     configureServer: (server) => {
-      if (!server.httpServer) {
-        return;
-      }
-      createSocketIOServer(server.httpServer);
+      if (!server.httpServer) return;
+
+      websocketServer(server.httpServer);
+    },
+    configurePreviewServer(server) {
+      if (!server.httpServer) return;
+
+      websocketServer(server.httpServer);
     },
   };
 }
@@ -25,12 +30,19 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [".trycloudflare.com"],
+    // proxy: {
+    //   "/ws": {
+    //     target: "ws://localhost:8081",
+    //     ws: true,
+    //     changeOrigin: true,
+    //   },
+    // },
   },
   plugins: [
     react(),
     tailwindcss(),
-    SocketIOServerPlugin(),
-    // process.env.SELF_SIGN_SSL === "true" && basicSsl(),
-    // basicSsl(),
+    // SocketIOServerPlugin(),
+    WebsocketPlugin(),
+    process.env.SELF_SIGN_SSL === "true" && basicSsl(),
   ],
 });

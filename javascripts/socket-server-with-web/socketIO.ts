@@ -11,38 +11,75 @@ export default function createSocketIOServer(
     },
   });
 
-  io.on("connection", (socket) => {
-    const { username, role, roomId } = socket.handshake.query as {
+  io.on("connection", async (socket) => {
+    const { username, role } = socket.handshake.query as {
       username: string;
       role: string;
-      roomId: string;
     };
 
-    socket.join(roomId);
+    const clients = await (
+      await io.fetchSockets()
+    )
+      .filter((s) => s.id !== socket.id)
+      .map((s) => {
+        return {
+          id: s.id,
+          address: s.handshake.address,
+          properties: {
+            username: s.handshake.query["username"],
+            role: s.handshake.query["role"],
+            timeJoined: s.handshake.issued,
+          },
+        };
+      });
 
-    socket.to(roomId).emit("newUser", { from: socket.id, username, role });
+    io.to(socket.id).emit("Clients", clients);
 
-    socket.on("requestOffer", ({ to }) => {
-      socket.to(to).emit("requestOffer", { from: socket.id, username, role });
+    io.to(socket.id).emit("ClientEntered", {
+      id: socket.id,
+      address: socket.handshake.address,
+      properties: { username, role, timeJoined: socket.handshake.issued },
+    });
+
+    socket.broadcast.emit("ClientEnter", {
+      id: socket.id,
+      address: socket.handshake.address,
+      properties: { username, role, timeJoined: socket.handshake.issued },
     });
 
     socket.on(
       "signal",
-      ({ to, description }: { to: string; description: unknown }) => {
+      ({
+        to,
+        description,
+      }: {
+        to: string;
+        description: RTCSessionDescriptionInit;
+      }) => {
+        // const mLines = description.sdp
+        //   ?.split("\n")
+        //   .filter((line) => line.startsWith("m="));
+
+        // console.log(
+        //   `${username} sending ${description.type} to ${to} m-lines:`,
+        //   mLines
+        // );
         socket.to(to).emit("signal", { from: socket.id, description });
       }
     );
 
     socket.on(
-      "icecandidate",
-      ({ to, candidate }: { to: string; candidate: unknown }) => {
-        socket.to(to).emit("icecandidate", { from: socket.id, candidate });
+      "candidate",
+      ({ to, candidate }: { to: string; candidate: RTCIceCandidate }) => {
+        socket.to(to).emit("candidate", { from: socket.id, candidate });
       }
     );
 
     socket.on("disconnecting", () => {
-      socket.rooms.forEach((room) => {
-        socket.to(room).emit("userLeft", { from: socket.id, role });
+      socket.broadcast.emit("ClientExit", {
+        id: socket.id,
+        address: socket.handshake.address,
+        properties: { username, role },
       });
     });
   });

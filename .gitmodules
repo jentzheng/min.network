@@ -6,10 +6,6 @@
 	path = source/min-lib
 	url = https://github.com/Cycling74/min-lib.git
 
-[submodule "source/socket.io-client-cpp"]
-	path = source/socket.io-client-cpp
-	url = https://github.com/socketio/socket.io-client-cpp.git
-
 [submodule "source/libdatachannel"]
 	path = source/libdatachannel
 	url = https://github.com/paullouisageneau/libdatachannel.git
