@@ -18,7 +18,7 @@ public:
     outlet<> output_dict { this, "(dict) Output", "dictionary" };
     argument<symbol> host_arg
     {
-        this, "host", "Remote Socket.IO server", MIN_ARGUMENT_FUNCTION
+        this, "host", "Remote Websocket server", MIN_ARGUMENT_FUNCTION
         {
             m_host = arg;
         }
@@ -74,11 +74,7 @@ public:
             });
     };
 
-    ~webrtc()
-    {
-
-        cout << "out_matrix_obj free" << endl;
-    };
+    ~webrtc() { };
 
     // A min::queue creates an element that,
     // when set, will be executed by Max’s low-priority queue.
@@ -87,6 +83,7 @@ public:
         this,
             MIN_FUNCTION
         {
+            // TODO
             symbol dict_name(true);
             dict m_dict(dict_name);
             m_dict["username"] = "username";
@@ -122,7 +119,6 @@ public:
         this, "bang", "Post the greeting.",
             MIN_FUNCTION
         {
-
             return {};
         }
     };
@@ -132,7 +128,6 @@ public:
         this, "jit_matrix", "Process Jitter matrix", MIN_FUNCTION
         {
             if (args.size() > 0) {
-
                 symbol matrix_name = args[0];
                 void* jit_matrix = max::jit_object_findregistered(matrix_name);
                 if (!jit_matrix)
@@ -164,7 +159,7 @@ public:
 private:
     // Max members
     c74::min::mutex m_mutex;
-    symbol m_host { "http://localhost:5173" };
+    symbol m_host { "ws://localhost:5173/ws" };
     symbol m_name { "Max#0" };
     number log_level = 0;
 
