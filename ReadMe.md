@@ -1,28 +1,49 @@
-# my_new_package
-This package was created using the Min-DevKit for Max, an API and supporting tools for writing externals in modern C++.
+# min.network.webrtc
 
+This package enables WebRTC video (and future audio) communication between Max and browsers, using modern C++ (Min-API) and a React/Websocket frontend.
 
+![screenshot](./screenshot.png)
 
-## Prerequisites
+## Video Send/Receive Flow
 
-You can use the objects provided in this package as-is.
+### Max → Browser
 
-To code your own objects, or to re-compile existing objects, you will need a compiler:
+Max (matrix) → ARGBtoI420(libav sws_scale in CPU) → Encoder (libav videotoolbox in GPU) → WebRTC RTP → Browser
 
-* On the Mac this means **Xcode 9 or later** (you can get from the App Store for free). 
-* On Windows this means **Visual Studio 2017** (you can download a free version from Microsoft). The installer for Visual Studio 2017 offers an option to install Git, which you should choose to do.
+---
 
-You will also need the Min-DevKit, available from the Package Manager inside of Max or [directly from Github](https://github.com/Cycling74/min-devkit).
+### Browser → Max
 
+Browser (cam) → WebRTC RTP → Decoder (libav videotoolbox in GPU) → I420toARGB(libav sws_scale in CPU) → Matrix → Max
 
+---
 
+## Building the C++ External
 
-## Contributors / Acknowledgements
+Only ARM64 (Apple Silicon) is supported at present, as development is done on my Mac m1 pro.
 
-The my_new_package is the work of some amazing and creative artists, researchers, and coders.
+---
 
+## Frontend (JavaScript)
 
+The frontend is located in `javascripts/socket-server-with-web`.
 
-## Support
+**Setup:**
 
-For support, please contact the developer of this package.
+```sh
+cd javascripts/socket-server-with-web
+npm install
+npm run dev
+# http://localhost:5173
+# wsaddres `ws://localhost:5173/ws`
+
+# or with self sign cert
+npm run build
+npm run preview
+# https://localhost:4173
+# wsaddres `wss://localhost:5173/ws`
+
+# then can use another device to access the web
+# browser https://192.168.x.x:4173
+# wss://192.168.x.x:4173/ws
+```
