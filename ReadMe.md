@@ -22,6 +22,16 @@ Browser (cam) → WebRTC RTP → Decoder (libav videotoolbox in GPU) → I420toA
 
 Only ARM64 (Apple Silicon) is supported at present, as development is done on my Mac m1 pro.
 
+### Dependencies (C++)
+
+This project uses the following libraries (see `CMakeLists.txt`):
+
+- **LibDataChannel** (WebRTC signaling/data transport)
+- **libav** (FFmpeg: libavdevice, libavcodec, libavformat, libavutil, libswscale)
+- **nlohmann_json** (JSON parsing for C++)
+
+These libraries must be installed and discoverable by CMake for successful compilation.
+
 ---
 
 ## Frontend (JavaScript)
@@ -47,3 +57,4 @@ npm run preview
 # browser https://192.168.x.x:4173
 # wss://192.168.x.x:4173/ws
 ```
+
