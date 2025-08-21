@@ -23,21 +23,43 @@ const resolutions = [
   },
 ];
 
+const LOCAL_RES_KEY = "camera_resolution";
+const LOCAL_DEV_KEY = "camera_deviceId";
+
 export default function CamaraComponent({
   onCameraStart,
   onCameraStop,
 }: {
-  onCameraStart?: (stream: MediaStream) => void;
+  onCameraStart?: (stream: MediaStream, videoEle: HTMLVideoElement) => void;
   onCameraStop?: (stream: MediaStream) => void;
 }) {
   const camVideoRef = useRef<HTMLVideoElement>(null);
 
-  const [selectedResolution, setSelectedResolution] = useState(resolutions[0]);
+  const [selectedResolution, setSelectedResolution] = useState(() => {
+    const resIdx = localStorage.getItem(LOCAL_RES_KEY);
+    return resIdx ? resolutions[parseInt(resIdx)] : resolutions[0];
+  });
+  // const [zoom, setZoom] = useState(1);
+  const [canZoom, setCanZoom] = useState(false);
+
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(
+    () => {
+      return localStorage.getItem(LOCAL_DEV_KEY) || null;
+    }
+  );
+
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const handleZoomChange = (newZoom: number) => {
+    console.log("trigger", newZoom);
+    const stream = streamRef.current;
+    if (canZoom && stream) {
+      const track = stream.getVideoTracks()[0];
+      track.applyConstraints({ advanced: [{ zoom: newZoom }] });
+    }
+  };
 
   const handleStartWebcam = useCallback(async () => {
     const video = camVideoRef.current;
@@ -54,17 +76,22 @@ export default function CamaraComponent({
         deviceId: { exact: selectedDeviceId },
         width,
         height,
-        facingMode,
       },
     });
+
+    const track = mediaStream.getVideoTracks()[0];
+    const caps = track.getCapabilities();
+    if (caps.zoom) {
+      setCanZoom(true);
+    }
 
     video.srcObject = mediaStream;
     streamRef.current = mediaStream;
 
     if (onCameraStart) {
-      onCameraStart(mediaStream);
+      onCameraStart(mediaStream, video);
     }
-  }, [selectedDeviceId, selectedResolution, facingMode, onCameraStart]);
+  }, [selectedDeviceId, selectedResolution, onCameraStart]);
 
   const handleStopWebcam = useCallback(async () => {
     const mediaStream = streamRef.current;
@@ -80,6 +107,17 @@ export default function CamaraComponent({
     }
   }, [onCameraStop]);
 
+  const handleFullscreen = useCallback(() => {
+    const video = camVideoRef.current;
+    if (!video) return;
+    if ("webkitEnterFullscreen" in video) {
+      // @ts-ignore
+      video.webkitEnterFullscreen(); // for iOS Safari
+    } else if (video.requestFullscreen) {
+      video.requestFullscreen(); // Android, desktop
+    }
+  }, []);
+
   // grab input devices
   useEffect(() => {
     (async () => {
@@ -91,12 +129,19 @@ export default function CamaraComponent({
         const videoInputs = devices.filter((d) => d.kind === "videoinput");
         setVideoDevices(videoInputs);
         if (videoInputs.length > 0) {
-          setSelectedDeviceId(videoInputs[0].deviceId);
+          const localDevId = localStorage.getItem(LOCAL_DEV_KEY);
+          const found = videoInputs.find((d) => d.deviceId === localDevId);
+          if (localDevId && found) {
+            setSelectedDeviceId(localDevId);
+          } else {
+            setSelectedDeviceId(videoInputs[0].deviceId);
+          }
         }
       });
     })();
   }, []);
 
+  // init start camera
   useEffect(() => {
     if (!selectedDeviceId || !selectedResolution) {
       return;
@@ -104,23 +149,48 @@ export default function CamaraComponent({
     handleStartWebcam();
   }, [selectedDeviceId, selectedResolution, handleStartWebcam]);
 
+  useEffect(() => {
+    if (selectedDeviceId) {
+      localStorage.setItem(LOCAL_DEV_KEY, selectedDeviceId);
+    }
+  }, [selectedDeviceId]);
+
+  useEffect(() => {
+    const idx = resolutions.findIndex(
+      (r) => r.label === selectedResolution.label
+    );
+    if (idx >= 0) {
+      localStorage.setItem(LOCAL_RES_KEY, idx.toString());
+    }
+  }, [selectedResolution]);
+
   return (
-    <div className="relative w-full h-full" style={{ minHeight: "400px" }}>
-      <div className="relative w-full h-full">
-        <video
-          ref={camVideoRef}
-          autoPlay
-          playsInline
-          controls={false}
-          className="block w-full max-w-full bg-black pointer-events-none"
-          style={{ height: "100%", objectFit: "cover" }}
-        />
-      </div>
+    <div className="overflow-hidden relative h-full">
+      <video
+        ref={camVideoRef}
+        autoPlay
+        playsInline
+        controls={false}
+        className="block w-full h-full object-contain bg-black pointer-events-none"
+        style={{ maxHeight: "100%", maxWidth: "100%" }}
+      />
 
       <div
-        className="absolute left-0 bottom-0 w-full  p-2"
+        className="absolute left-0 bottom-0 w-full p-2"
         style={{ background: "rgba(0,0,0,0.3)" }}
       >
+        {canZoom && (
+          <input
+            type="range"
+            className="range block mx-auto mb-10"
+            min={1}
+            defaultValue={1}
+            max={10}
+            step={0.5}
+            // value={zoom}
+            onChange={(e) => handleZoomChange(Number(e.target.value))}
+          />
+        )}
         <div className="flex flex-wrap gap-2 w-full justify-center">
           <div className="dropdown dropdown-top">
             <button tabIndex={0} className="btn btn-secondary">
@@ -167,11 +237,16 @@ export default function CamaraComponent({
               ))}
             </ul>
           </div>
+
           <button className="btn btn-primary" onClick={handleStartWebcam}>
             Start
           </button>
           <button className="btn btn-warning" onClick={handleStopWebcam}>
             Stop
+          </button>
+
+          <button className="btn" onClick={handleFullscreen}>
+            Fullscreen
           </button>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { WebSocketServer } from "ws";
 import type http from "http";
-import url from "node:url";
 
 import { type SignalingMessage } from "./src/utils/signalingClient";
 import type { WebSocket as WsWebSocket } from "ws";

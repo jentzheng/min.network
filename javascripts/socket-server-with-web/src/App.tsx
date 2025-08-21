@@ -101,7 +101,7 @@ function App() {
       {/* Sidebar Toggle Button */}
       <input id="sidebar-toggle" type="checkbox" className="drawer-toggle" />
       {/* Main Layout */}
-      <div className="drawer-content flex flex-col max-h-screen">
+      <div className="drawer-content">
         {/* Header: hamburger + nav links */}
         <header className="flex items-center gap-4 px-4 py-2  bg-base-100">
           <label
@@ -137,31 +137,39 @@ function App() {
             >
               Test
             </NavLink>
+            <NavLink
+              role="tab"
+              className={({ isActive }) =>
+                isActive ? "tab tab-active" : "tab"
+              }
+              to="/camera"
+            >
+              Camera
+            </NavLink>
+            <NavLink
+              role="tab"
+              className={({ isActive }) =>
+                isActive ? "tab tab-active" : "tab"
+              }
+              to="/facelandmark"
+            >
+              Face Landmark
+            </NavLink>
 
             {/* will do it later */}
-            {/* <NavLink
-                role="tab"
-                className={({ isActive }) =>
-                  isActive ? "tab tab-active" : "tab"
-                }
-                to="/detection"
-              >
-                Detection
-              </NavLink>
-              <NavLink
-                role="tab"
-                className={({ isActive }) =>
-                  isActive ? "tab tab-active" : "tab"
-                }
-                to="/camera"
-              >
-                Camera
-              </NavLink> */}
+            {/* 
+             
+               */}
           </nav>
         </header>
 
         {/* Main Content */}
-        <main className="bg-gray-600 flex-1 overflow-auto">
+        <main
+          className="bg-gray-600"
+          style={{
+            height: "calc(100vh - 56px)",
+          }}
+        >
           <ConnectionContext.Provider
             value={{
               webRTCConnection: webRTCConnection,
@@ -174,10 +182,10 @@ function App() {
         </main>
       </div>
 
-      <aside className="drawer-side">
+      <aside className="drawer-side ">
         <label htmlFor="sidebar-toggle" className="drawer-overlay"></label>
 
-        <div className="h-full bg-base-200">
+        <div className="h-full min-h-max bg-base-200">
           <form onSubmit={handleConnect} className="p-4">
             <div className="grid gap-4">
               {/* <label className="form-control w-full">

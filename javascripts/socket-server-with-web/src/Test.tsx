@@ -159,7 +159,7 @@ export const Test: React.FC = () => {
   );
 
   return (
-    <div className="">
+    <div className="p-4">
       <div className="grid grid-cols-2 gap-2">
         <CamaraComponent
           onCameraStart={handleCameraStart}
@@ -177,9 +177,9 @@ export const Test: React.FC = () => {
         </div>
       </div>
 
-      <div className="mb-4">
+      <div className="my-4">
         <h3 className="text-lg font-semibold mb-2">Messages</h3>
-        <div className="border rounded-lg p-4 h-48 overflow-y-auto bg-white shadow-inner">
+        <div className="border rounded-lg p-4 h-50 overflow-y-auto bg-white shadow-inner">
           {messages.length === 0 ? (
             <div className="text-gray-500 text-sm">No messages yet...</div>
           ) : (
