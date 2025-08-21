@@ -23,8 +23,8 @@
 	<objarglist>
 
 		<objarg name='host' optional='1' type='symbol'>
-			<digest>Remote Socket</digest>
-			<description>Remote Socket.IO server </description>
+			<digest>Remote Websocket server </digest>
+			<description>Remote Websocket server </description>
 		</objarg>
 
 		<objarg name='name' optional='1' type='symbol'>

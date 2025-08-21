@@ -271,19 +271,21 @@ WebRTCClient::createPeerConnection(
             it->second.data_channel = dc;
         }
 
-        dc->onOpen([this, remote_id]() {
-            log("DataChannel open from " + remote_id);
+        dc->onOpen([this, remote_id, wdc = make_weak_ptr(dc)]() {
+            if (auto dc = wdc.lock()) {
+                log("DataChannel  from " + remote_id + " opened");
+            }
         });
 
-        dc->onMessage([this](std::variant<rtc::binary, rtc::string> data) {
-            try {
-                if (std::holds_alternative<std::string>(data)) {
-                    json message = json::parse(std::get<std::string>(data));
-                    log("Received JSON message: " + message.dump());
-                    dc_callback(message.dump());
-                }
-            } catch (const std::exception& e) {
-                log(std::string("Exception in DataChannel onMessage: ") + e.what());
+        dc->onClosed([this, remote_id]() {
+            log("DataChannel from " + remote_id + " closed");
+        });
+
+        dc->onMessage([this](auto data) {
+            if (std::holds_alternative<std::string>(data)) {
+                dc_callback(std::get<std::string>(data));
+            } else {
+                std::cout << "Binary message: " << " received, size=" << std::get<rtc::binary>(data).size() << std::endl;
             }
         });
     });

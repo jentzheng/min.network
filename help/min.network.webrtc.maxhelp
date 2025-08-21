@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 82.0, 100.0, 675.0, 983.0 ],
+		"rect" : [ 82.0, 100.0, 760.0, 983.0 ],
 		"gridonopen" : 2,
 		"gridsize" : [ 8.0, 8.0 ],
 		"gridsnaponopen" : 2,
@@ -18,12 +18,80 @@
 		"subpatcher_template" : "tap.template",
 		"boxes" : [ 			{
 				"box" : 				{
+					"id" : "obj-21",
+					"maxclass" : "message",
+					"numinlets" : 2,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 240.0, 232.0, 130.0, 22.0 ],
+					"text" : "dictionary u852005785"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-19",
+					"maxclass" : "dict.view",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 392.0, 304.0, 232.0, 224.0 ]
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-18",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 2,
+					"outlettype" : [ "dictionary", "dictionary" ],
+					"patching_rect" : [ 392.0, 272.0, 145.0, 22.0 ],
+					"text" : "dict.route from:Chrome#2"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-17",
+					"maxclass" : "newobj",
+					"numinlets" : 2,
+					"numoutlets" : 2,
+					"outlettype" : [ "dictionary", "dictionary" ],
+					"patching_rect" : [ 80.0, 264.0, 145.0, 22.0 ],
+					"text" : "dict.route from:Chrome#1"
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-6",
+					"maxclass" : "dict.view",
+					"numinlets" : 1,
+					"numoutlets" : 0,
+					"patching_rect" : [ 80.0, 296.0, 232.0, 224.0 ]
+				}
+
+			}
+, 			{
+				"box" : 				{
+					"id" : "obj-2",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "dictionary" ],
+					"patching_rect" : [ 80.0, 192.0, 271.0, 22.0 ],
+					"text" : "min.network.webrtc ws://localhost:5173/ws Jitter1"
+				}
+
+			}
+, 			{
+				"box" : 				{
 					"id" : "obj-10",
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 56.0, 240.0, 31.0, 22.0 ],
+					"patching_rect" : [ 80.0, 24.0, 31.0, 22.0 ],
 					"text" : "next"
 				}
 
@@ -38,7 +106,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 240.0, 584.0, 80.0, 37.0 ],
+					"patching_rect" : [ 304.0, 688.0, 80.0, 37.0 ],
 					"style" : "default"
 				}
 
@@ -53,7 +121,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 96.0, 576.0, 80.0, 37.0 ],
+					"patching_rect" : [ 96.0, 688.0, 80.0, 37.0 ],
 					"style" : "default"
 				}
 
@@ -65,7 +133,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
-					"patching_rect" : [ 232.0, 648.0, 160.0, 120.0 ],
+					"patching_rect" : [ 256.0, 752.0, 160.0, 120.0 ],
 					"prototypename" : "160by120_uyvy",
 					"sync" : 1
 				}
@@ -74,12 +142,11 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-13",
-					"linecount" : 2,
 					"maxclass" : "newobj",
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
-					"patching_rect" : [ 192.0, 536.0, 111.0, 35.0 ],
+					"patching_rect" : [ 256.0, 640.0, 113.0, 22.0 ],
 					"style" : "default",
 					"text" : "jit.matrix Chrome#2"
 				}
@@ -93,7 +160,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "int" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 192.0, 472.0, 24.0, 24.0 ],
+					"patching_rect" : [ 256.0, 576.0, 24.0, 24.0 ],
 					"style" : "default"
 				}
 
@@ -105,7 +172,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "bang" ],
-					"patching_rect" : [ 192.0, 504.0, 63.0, 22.0 ],
+					"patching_rect" : [ 256.0, 608.0, 63.0, 22.0 ],
 					"style" : "default",
 					"text" : "qmetro 33"
 				}
@@ -119,7 +186,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "bang" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 56.0, 472.0, 24.0, 24.0 ],
+					"patching_rect" : [ 80.0, 576.0, 24.0, 24.0 ],
 					"style" : "default"
 				}
 
@@ -131,7 +198,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
-					"patching_rect" : [ 56.0, 648.0, 160.0, 120.0 ],
+					"patching_rect" : [ 80.0, 752.0, 160.0, 120.0 ],
 					"prototypename" : "160by120_uyvy",
 					"sync" : 1
 				}
@@ -140,27 +207,13 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-3",
-					"linecount" : 2,
 					"maxclass" : "newobj",
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
-					"patching_rect" : [ 56.0, 536.0, 111.0, 35.0 ],
+					"patching_rect" : [ 80.0, 640.0, 113.0, 22.0 ],
 					"style" : "default",
 					"text" : "jit.matrix Chrome#1"
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"id" : "obj-2",
-					"maxclass" : "newobj",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "dictionary" ],
-					"patching_rect" : [ 56.0, 408.0, 275.0, 22.0 ],
-					"style" : "default",
-					"text" : "min.network.webrtc ws://localhost:5173/ws jitter1"
 				}
 
 			}
@@ -171,7 +224,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 136.0, 376.0, 66.0, 22.0 ],
+					"patching_rect" : [ 160.0, 144.0, 66.0, 22.0 ],
 					"style" : "default",
 					"text" : "disconnect"
 				}
@@ -184,7 +237,7 @@
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 80.0, 376.0, 51.0, 22.0 ],
+					"patching_rect" : [ 104.0, 144.0, 51.0, 22.0 ],
 					"style" : "default",
 					"text" : "connect"
 				}
@@ -192,7 +245,7 @@
 			}
 , 			{
 				"box" : 				{
-					"clipheight" : 20.333333333333332,
+					"clipheight" : 31.0,
 					"data" : 					{
 						"clips" : [ 							{
 								"absolutepath" : "chickens.mp4",
@@ -203,19 +256,6 @@
 								"content_state" : 								{
 									"loop" : 1,
 									"vol" : 0,
-									"unique" : 1
-								}
-
-							}
-, 							{
-								"absolutepath" : "/Users/jentzheng/Desktop/latown-sanyuanli/media/San Yuan Li.mp4",
-								"filename" : "San Yuan Li.mp4",
-								"filekind" : "moviefile",
-								"id" : "u294000772",
-								"selection" : [ 0.173913043478261, 0.503105590062112 ],
-								"loop" : 1,
-								"content_state" : 								{
-									"loop" : 1,
 									"unique" : 1
 								}
 
@@ -245,7 +285,7 @@
 					"outlettype" : [ "jit_matrix", "", "dictionary" ],
 					"output_texture" : 0,
 					"parameter_enable" : 0,
-					"patching_rect" : [ 56.0, 280.0, 216.0, 64.0 ],
+					"patching_rect" : [ 80.0, 64.0, 216.0, 64.0 ],
 					"saved_attribute_attributes" : 					{
 						"candicane2" : 						{
 							"expression" : ""
@@ -330,6 +370,44 @@
 			}
 , 			{
 				"patchline" : 				{
+					"destination" : [ "obj-6", 0 ],
+					"source" : [ "obj-17", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-19", 0 ],
+					"source" : [ "obj-18", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-17", 0 ],
+					"order" : 2,
+					"source" : [ "obj-2", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-18", 0 ],
+					"order" : 0,
+					"source" : [ "obj-2", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-21", 1 ],
+					"order" : 1,
+					"source" : [ "obj-2", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
 					"destination" : [ "obj-15", 0 ],
 					"order" : 0,
 					"source" : [ "obj-3", 0 ]
@@ -354,13 +432,6 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-2", 0 ],
-					"source" : [ "obj-5", 0 ]
-				}
-
-			}
-, 			{
-				"patchline" : 				{
-					"destination" : [ "obj-2", 0 ],
 					"source" : [ "obj-8", 0 ]
 				}
 
@@ -374,13 +445,6 @@
 			}
  ],
 		"dependency_cache" : [ 			{
-				"name" : "San Yuan Li.mp4",
-				"bootpath" : "~/Desktop/latown-sanyuanli/media",
-				"patcherrelativepath" : "../../../../../Desktop/latown-sanyuanli/media",
-				"type" : "mpg4",
-				"implicit" : 1
-			}
-, 			{
 				"name" : "blading.mov",
 				"bootpath" : "C74:/media/jitter",
 				"type" : "MooV",

@@ -1,13 +1,13 @@
 {
-  "cmake.generator": "Xcode",
-  "cmake.environment": {
-    "CMAKE_OSX_ARCHITECTURES": "arm64",
-    "MACOSX_DEPLOYMENT_TARGET": "10.13"
-  },
-  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "files.associations": {
     "*.gyp": "python",
     ".clang-format": "plaintext",
+    "chrono": "cpp",
+    "iostream": "cpp",
+    "iterator": "cpp",
+    "list": "cpp",
+    "mutex": "cpp",
+    "system_error": "cpp",
     "algorithm": "cpp",
     "cmath": "cpp",
     "any": "cpp",
@@ -20,7 +20,6 @@
     "cctype": "cpp",
     "cfenv": "cpp",
     "charconv": "cpp",
-    "chrono": "cpp",
     "cinttypes": "cpp",
     "clocale": "cpp",
     "codecvt": "cpp",
@@ -43,7 +42,6 @@
     "cwctype": "cpp",
     "deque": "cpp",
     "forward_list": "cpp",
-    "list": "cpp",
     "map": "cpp",
     "set": "cpp",
     "string": "cpp",
@@ -53,7 +51,6 @@
     "exception": "cpp",
     "expected": "cpp",
     "functional": "cpp",
-    "iterator": "cpp",
     "memory": "cpp",
     "memory_resource": "cpp",
     "numeric": "cpp",
@@ -63,7 +60,6 @@
     "regex": "cpp",
     "source_location": "cpp",
     "string_view": "cpp",
-    "system_error": "cpp",
     "tuple": "cpp",
     "type_traits": "cpp",
     "utility": "cpp",
@@ -76,11 +72,9 @@
     "initializer_list": "cpp",
     "iomanip": "cpp",
     "iosfwd": "cpp",
-    "iostream": "cpp",
     "istream": "cpp",
     "latch": "cpp",
     "limits": "cpp",
-    "mutex": "cpp",
     "new": "cpp",
     "numbers": "cpp",
     "ostream": "cpp",
@@ -103,6 +97,17 @@
     "typeindex": "cpp",
     "typeinfo": "cpp",
     "valarray": "cpp",
-    "variant": "cpp"
-  }
+    "variant": "cpp",
+    "locale": "cpp"
+  },
+  // use ninja build in vscode
+  "cmake.generator": "Xcode",
+  "cmake.configureSettings": {
+    "CMAKE_EXPORT_COMPILE_COMMANDS": true
+  },
+  "cmake.environment": {
+    "CMAKE_OSX_ARCHITECTURES": "arm64",
+    "MACOSX_DEPLOYMENT_TARGET": "13"
+  },
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

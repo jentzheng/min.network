@@ -8,7 +8,7 @@ class webrtc : public c74::min::object<webrtc> {
 public:
     MIN_DESCRIPTION { "Send and Recive video(it will support audio in the future) from browser through WebRTC." };
     MIN_AUTHOR { "Cycling '74" };
-    MIN_TAGS { "video" };
+    MIN_TAGS { "video", "developer", "utilities" };
     MIN_RELATED { "jitter" };
 
     inlet<> input_matrix { this, "(matrix) Input", "matrix" };
@@ -42,6 +42,7 @@ public:
             m_name = args[1];
         }
 
+        // init WebRTCClient
         m_client = std::make_unique<WebRTCClient>(
             // callback log from WebRTCClient
             [this](const std::string& webrtc_log) {
@@ -49,7 +50,17 @@ public:
             },
             // callback datachannel message from WebRTCClient
             [this](const std::string& dc_message) {
-                // TODO
+                max::t_dictionary* m_dict = max::dictionary_new();
+                char errorstring[256] = { 0 };
+                max::dictobj_dictionaryfromstring(&m_dict, dc_message.c_str(), 1, errorstring);
+
+                max::t_symbol* dict_name = nullptr;
+                max::dictobj_register(m_dict, &dict_name);
+                m_pending_dict_name = symbol(dict_name->s_name);
+                max::dictobj_release(m_dict);
+
+                // TODO: what is the best approch to send it to dict outlet
+                deferrer.set();
             },
             // callack argb from WebRTCClient's h264 decoder
             [this](const std::string& remote_username, const uint8_t* argb, size_t size, int width, int height) {
@@ -67,7 +78,7 @@ public:
                     info.type = max::_jit_sym_char;
                     max::jit_object_method(remote_matrix, max::_jit_sym_setinfo_ex, &info);
                     max::jit_object_method(remote_matrix, max::_jit_sym_data, argb);
-                    //                    max::jit_object_method(remote_matrix, max::_jit_sym_matrix_calc); // doesn't work...
+                    // max::jit_object_method(remote_matrix, max::_jit_sym_matrix_calc); // doesn't work...
                     max::object_method(remote_matrix, max::gensym("bang")); // doesn't work...
                     max::jit_object_method(remote_matrix, max::_jit_sym_lock, out_savelock);
                 }
@@ -78,16 +89,19 @@ public:
 
     // A min::queue creates an element that,
     // when set, will be executed by Max’s low-priority queue.
-    queue<> deferrer_dict_out
+    queue<> deferrer
     {
         this,
             MIN_FUNCTION
         {
-            // TODO
-            symbol dict_name(true);
-            dict m_dict(dict_name);
-            m_dict["username"] = "username";
-            output_dict.send("dictionary", dict_name);
+
+            dict m_dict;
+
+            if (m_pending_dict_name != symbol {}) {
+                output_dict.send("dictionary", m_pending_dict_name);
+                m_pending_dict_name = symbol {};
+            }
+
             return {};
         }
     };
@@ -139,14 +153,15 @@ public:
                 max::object_method(jit_matrix, max::_jit_sym_getinfo, &matrix_info);
                 max::object_method(jit_matrix, max::_jit_sym_getdata, &matrix_data);
 
-                uint8_t* argb_data = static_cast<uint8_t*>(matrix_data);
                 long width = matrix_info.dim[0];
                 long height = matrix_info.dim[1];
                 long planes = matrix_info.planecount;
                 long size = matrix_info.size;
+                // uint8_t* argb_data = static_cast<uint8_t*>(matrix_data);
 
                 if (matrix_data && size > 0) {
-                    m_client->capture_matrix(argb_data,
+                    m_client->capture_matrix(
+                        static_cast<uint8_t*>(matrix_data),
                         static_cast<int>(width),
                         static_cast<int>(height),
                         static_cast<int>(planes));
@@ -161,7 +176,7 @@ private:
     c74::min::mutex m_mutex;
     symbol m_host { "ws://localhost:5173/ws" };
     symbol m_name { "Max#0" };
-    number log_level = 0;
+    symbol m_pending_dict_name;
 
     // WebRTCClient members
     std::unique_ptr<WebRTCClient> m_client;

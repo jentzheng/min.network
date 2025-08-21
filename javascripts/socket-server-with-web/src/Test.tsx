@@ -135,6 +135,11 @@ export const Test: React.FC = () => {
           JSON.stringify({
             from: webRTCConnection.signalingClient.properties.username,
             message: inputMessage,
+            nested: {
+              type: "nestedObj",
+              array: [1, 2, 3, 4],
+            },
+            array: [{ key1: "val" }, { key2: "val" }],
           })
         );
 

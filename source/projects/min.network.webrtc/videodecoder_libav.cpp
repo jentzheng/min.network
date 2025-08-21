@@ -63,6 +63,7 @@ void VideoDecoderLibav::decodeFrame(std::vector<std::byte> binary, size_t binary
     pkt->size = static_cast<int>(binary_size);
 
     ret = avcodec_send_packet(ctx, pkt);
+    
     if (ret < 0) {
         std::cerr << "avcodec_send_packet failed: " << ret << std::endl;
         av_packet_unref(pkt);
