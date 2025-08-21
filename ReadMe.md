@@ -1,5 +1,8 @@
 # min.network.webrtc
 
+> **Note:** I am not a C++ programmer. This project was converted from my previous Node.js WebRTC version to C++ in about one month, mostly with the help of AI tools. There are still bugs and many areas for improvement. I hope Cycling '74 core members or experienced developers will consider contributing!
+
+
 This package enables WebRTC video (and future audio) communication between Max and browsers, using modern C++ (Min-API) and a React/Websocket frontend.
 
 ![screenshot](./screenshot.png)
