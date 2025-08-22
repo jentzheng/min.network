@@ -98,16 +98,15 @@
     "typeinfo": "cpp",
     "valarray": "cpp",
     "variant": "cpp",
-    "locale": "cpp"
+    "locale": "cpp",
+    "*.inc": "cpp"
   },
   // use ninja build in vscode
   "cmake.generator": "Xcode",
-  "cmake.configureSettings": {
-    "CMAKE_EXPORT_COMPILE_COMMANDS": true
-  },
   "cmake.environment": {
-    "CMAKE_OSX_ARCHITECTURES": "arm64",
-    "MACOSX_DEPLOYMENT_TARGET": "13"
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+    "CMAKE_OSX_ARCHITECTURES": "arm64"
   },
-  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.compilerPath": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
 }

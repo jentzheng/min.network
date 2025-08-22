@@ -318,13 +318,16 @@ WebRTCClient::createPeerConnection(
 
     videoTrack->onFrame([this, remote_id, remote_name](rtc::binary data, rtc::FrameInfo info) {
         auto it = peerConnectionMap.find(remote_id);
-        if (it != peerConnectionMap.end()) {
-            // each incoming track should have its own decoder
-            auto& decoder = it->second.decoder;
-            if (!decoder) {
-                decoder = std::make_unique<VideoDecoderLibav>();
-            }
-            decoder->decodeFrame(data, data.size());
+        if (it == peerConnectionMap.end())
+            return;
+
+        // each incoming track should have its own decoder
+        auto& decoder = it->second.decoder;
+        if (!decoder) {
+            decoder = std::make_unique<VideoDecoderLibav>();
+        }
+
+        if (decoder->decodeFrame(data, info.timestamp)) {
             auto decoded = decoder->getDecodedData();
             video_data_callback(
                 remote_name,
@@ -332,7 +335,7 @@ WebRTCClient::createPeerConnection(
                 decoded.size,
                 decoded.width,
                 decoded.height);
-        }
+        };
     });
 
     peerConnectionMap.emplace(remote_id,
@@ -383,25 +386,21 @@ void WebRTCClient::removePeerConnection(const std::string& remote_id)
     if (it != peerConnectionMap.end()) {
         auto& conn = it->second;
 
+        if (conn.pc) {
+            conn.pc->close();
+            conn.pc.reset();
+        }
+
         if (conn.decoder) {
             conn.decoder.reset();
         }
 
         if (conn.video_track) {
-            conn.video_track->close();
             conn.video_track.reset();
         }
 
         if (conn.data_channel) {
-            conn.data_channel->resetCallbacks();
             conn.data_channel.reset();
-        }
-
-        if (conn.pc) {
-            conn.pc->resetCallbacks();
-            conn.pc->clearStats();
-            conn.pc->close();
-            conn.pc.reset();
         }
 
         peerConnectionMap.erase(it);

@@ -9,7 +9,6 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/imgutils.h> //for av_image_alloc only
 #include <libavutil/opt.h>
-
 #include <libswscale/swscale.h>
 }
 struct EncodedFrame {

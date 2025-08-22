@@ -1,47 +1,56 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useConnection } from "./utils/hooks";
 import CamaraComponent from "./components/Camara";
-import {
-  FaceLandmarker,
-  FilesetResolver,
-  type FaceLandmarkerResult,
-} from "@mediapipe/tasks-vision";
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 export const FaceLandmarkRoute = () => {
-  const { webRTCConnection, connectionState, dataChannel } = useConnection();
+  const { webRTCConnection, connectionState } = useConnection();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const [landmarkData, setLandmarkData] = useState<FaceLandmarkerResult>();
+  const intervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const startDetection = useCallback(
     async (videoEle: HTMLVideoElement) => {
-      let facelanmark: FaceLandmarker | null = null;
-      let running = true;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
       const vision = await FilesetResolver.forVisionTasks(
         // "/models/@mediapipe/task-vision/wasm"
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
       );
-      facelanmark = await FaceLandmarker.createFromOptions(vision, {
+
+      const facelanmark = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
           delegate: "GPU",
         },
-        outputFaceBlendshapes: true,
+        numFaces: 1,
+        // outputFaceBlendshapes: true,
         runningMode: "VIDEO",
       });
 
       const detectLoop = () => {
-        const canvas = canvasRef.current;
+        const now = performance.now();
 
-        if (!canvas) return;
+        const results = facelanmark!.detectForVideo(videoEle, now);
 
-        if (!running || !videoEle || videoEle.readyState < 2) {
-          requestAnimationFrame(detectLoop);
-          return;
-        }
-        const results = facelanmark!.detectForVideo(
-          videoEle,
-          performance.now()
+        webRTCConnection?.dc?.send(
+          JSON.stringify({
+            from: webRTCConnection.signalingClient.properties.username,
+            type: "facelandmark",
+            message: results,
+          })
         );
+
+        // console.log(results);
         // setLandmarkData(results);
         // draw overlay
         if (
@@ -72,15 +81,15 @@ export const FaceLandmarkRoute = () => {
             });
           });
         }
+      };
 
-        requestAnimationFrame(detectLoop);
-      };
-      detectLoop();
-      return () => {
-        running = false;
-      };
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      intervalRef.current = window.setInterval(detectLoop, 33); // 30fps
     },
-    [canvasRef]
+
+    [canvasRef, webRTCConnection]
   );
 
   const handleCameraStart = useCallback(
@@ -109,6 +118,11 @@ export const FaceLandmarkRoute = () => {
 
   const handleCameraStop = useCallback(
     async (stream: MediaStream) => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+
       if (!webRTCConnection?.pc) return;
 
       console.log("Camera stopped, stream:", stream);

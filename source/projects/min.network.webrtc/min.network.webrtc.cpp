@@ -8,7 +8,7 @@ class webrtc : public c74::min::object<webrtc> {
 public:
     MIN_DESCRIPTION { "Send and Recive video(it will support audio in the future) from browser through WebRTC." };
     MIN_AUTHOR { "Cycling '74" };
-    MIN_TAGS { "video", "developer", "utilities" };
+    MIN_TAGS { "video, utilities, developer" };
     MIN_RELATED { "jitter" };
 
     inlet<> input_matrix { this, "(matrix) Input", "matrix" };
@@ -16,6 +16,7 @@ public:
 
     // outlet<> output_signal { this, "(signal) Output", "signal" }; // TODO
     outlet<> output_dict { this, "(dict) Output", "dictionary" };
+
     argument<symbol> host_arg
     {
         this, "host", "Remote Websocket server", MIN_ARGUMENT_FUNCTION
@@ -50,20 +51,15 @@ public:
             },
             // callback datachannel message from WebRTCClient
             [this](const std::string& dc_message) {
-                max::t_dictionary* m_dict = max::dictionary_new();
-                char errorstring[256] = { 0 };
-                max::dictobj_dictionaryfromstring(&m_dict, dc_message.c_str(), 1, errorstring);
-
-                max::t_symbol* dict_name = nullptr;
-                max::dictobj_register(m_dict, &dict_name);
-                m_pending_dict_name = symbol(dict_name->s_name);
-                max::dictobj_release(m_dict);
-
-                // TODO: what is the best approch to send it to dict outlet
+                pending_message = dc_message;
                 deferrer.set();
             },
             // callack argb from WebRTCClient's h264 decoder
             [this](const std::string& remote_username, const uint8_t* argb, size_t size, int width, int height) {
+                if (size == 0) {
+                    return;
+                }
+
                 symbol matrix_name(remote_username);
                 void* remote_matrix = max::jit_object_findregistered(matrix_name);
 
@@ -79,13 +75,14 @@ public:
                     max::jit_object_method(remote_matrix, max::_jit_sym_setinfo_ex, &info);
                     max::jit_object_method(remote_matrix, max::_jit_sym_data, argb);
                     // max::jit_object_method(remote_matrix, max::_jit_sym_matrix_calc); // doesn't work...
-                    max::object_method(remote_matrix, max::gensym("bang")); // doesn't work...
+                    // max::object_method(remote_matrix, max::gensym("bang")); // doesn't work...
                     max::jit_object_method(remote_matrix, max::_jit_sym_lock, out_savelock);
                 }
             });
     };
 
-    ~webrtc() { };
+    ~webrtc() {
+    };
 
     // A min::queue creates an element that,
     // when set, will be executed by Max’s low-priority queue.
@@ -95,11 +92,24 @@ public:
             MIN_FUNCTION
         {
 
-            dict m_dict;
+            if (!pending_message.empty()) {
+                lock lock { m_mutex };
 
-            if (m_pending_dict_name != symbol {}) {
-                output_dict.send("dictionary", m_pending_dict_name);
-                m_pending_dict_name = symbol {};
+                max::t_dictionary* t_dict = nullptr;
+                char* errstr = nullptr;
+                max::dictobj_dictionaryfromstring(&t_dict, pending_message.c_str(), 1, errstr);
+
+                if (errstr != NULL) {
+                    return {};
+                }
+
+                max::t_symbol* dict_name = max::dictobj_namefromptr(t_dict);
+                t_dict = max::dictobj_register(t_dict, &dict_name);
+                // max::object_free(t_dict);
+                // max::dictionary_clear(t_dict);
+                lock.unlock();
+                output_dict.send("dictionary", dict_name->s_name);
+                max::dictobj_release(t_dict);
             }
 
             return {};
@@ -176,10 +186,32 @@ private:
     c74::min::mutex m_mutex;
     symbol m_host { "ws://localhost:5173/ws" };
     symbol m_name { "Max#0" };
-    symbol m_pending_dict_name;
 
     // WebRTCClient members
     std::unique_ptr<WebRTCClient> m_client;
+
+    std::string pending_message;
+
+    // message<> maxclass_setup
+    // {
+    //     this, "maxclass_setup",
+    //         MIN_FUNCTION
+    //     {
+    //         cout << "[maxclass_setup] hello world" << endl;
+    //         return {};
+    //     }
+    // };
+
+    // message<> setup
+    // {
+    //     this, "setup",
+    //         MIN_FUNCTION
+    //     {
+    //         cout << "[setup] hello world" << endl;
+
+    //         return {};
+    //     }
+    // };
 };
 
 MIN_EXTERNAL(webrtc);

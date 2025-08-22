@@ -11,32 +11,32 @@ extern "C" {
 }
 
 struct DecodedData {
-	const uint8_t* data;
-	size_t size;
-	int width;
-	int height;
+    const uint8_t* data;
+    size_t size;
+    int width;
+    int height;
 };
 
 class VideoDecoderLibav {
 public:
-	VideoDecoderLibav();
-	~VideoDecoderLibav();
+    VideoDecoderLibav();
+    ~VideoDecoderLibav();
 
-	void decodeFrame(std::vector<std::byte> binary, size_t binary_size);
+    bool decodeFrame(std::vector<std::byte> binary, uint32_t timestamp);
 
-	DecodedData getDecodedData() const
-	{
-		return { decoded_buffer.data(), decoded_buffer.size(), width, height };
-	};
+    DecodedData getDecodedData() const
+    {
+        return { decoded_buffer.data(), decoded_buffer.size(), width, height };
+    };
 
 private:
-	int width, height;
-	AVCodecContext* ctx;
-	AVBufferRef* hw_device_ctx;
-	AVPacket* pkt;
-	AVFrame* frame;
-	AVFrame* sw_frame;
-	SwsContext* sws_ctx;
+    int width, height;
+    AVCodecContext* ctx;
+    AVBufferRef* hw_device_ctx;
+    AVPacket* pkt;
+    AVFrame* frame;
+    AVFrame* sw_frame;
+    SwsContext* sws_ctx;
 
-	std::vector<uint8_t> decoded_buffer;
+    std::vector<uint8_t> decoded_buffer;
 };

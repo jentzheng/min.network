@@ -37,98 +37,87 @@ VideoDecoderLibav::VideoDecoderLibav()
 
 VideoDecoderLibav::~VideoDecoderLibav()
 {
-    // if (pkt)
-    av_packet_free(&pkt);
-    // if (sw_frame)
-    av_frame_free(&sw_frame);
-    // if (frame)
-    av_frame_free(&frame);
-    // if (sws_ctx)
+    avcodec_flush_buffers(ctx);
     sws_freeContext(sws_ctx);
-    // if (hw_device_ctx)
+    av_frame_free(&sw_frame);
+    av_frame_free(&frame);
     av_buffer_unref(&hw_device_ctx);
-    // if (ctx)
+    av_packet_free(&pkt);
     avcodec_free_context(&ctx);
 };
 
 // from webrtc remote video
-void VideoDecoderLibav::decodeFrame(std::vector<std::byte> binary, size_t binary_size)
+bool VideoDecoderLibav::decodeFrame(std::vector<std::byte> binary, uint32_t timestamp)
 {
-    if (binary_size <= 0) {
-        return;
-    }
 
     int ret;
     pkt->data = reinterpret_cast<uint8_t*>(binary.data());
-    pkt->size = static_cast<int>(binary_size);
+    pkt->size = static_cast<int>(binary.size());
+    pkt->pts = static_cast<int64_t>(timestamp);
 
     ret = avcodec_send_packet(ctx, pkt);
-    
     if (ret < 0) {
         std::cerr << "avcodec_send_packet failed: " << ret << std::endl;
-        av_packet_unref(pkt);
-        return;
+        return false;
     }
-
-    av_frame_unref(frame);
-    av_frame_unref(sw_frame);
 
     ret = avcodec_receive_frame(ctx, frame);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         av_packet_unref(pkt);
-        return;
-    }
-    if (ret < 0) {
+        return false;
+    } else if (ret < 0) {
         std::cerr << "avcodec_receive_frame failed: " << ret << std::endl;
-        av_packet_unref(pkt);
-        return;
-        ;
+        return false;
     }
+
     av_packet_unref(pkt);
 
     if (frame->format == AV_PIX_FMT_VIDEOTOOLBOX) {
+        //  transfer gpu frame to sw_frame
         ret = av_hwframe_transfer_data(sw_frame, frame, 0);
         if (ret < 0) {
             std::cerr << "av_hwframe_transfer_data failed: " << ret << std::endl;
-            return;
+            return false;
         }
     } else {
         std::cerr << "frame->format not support" << std::endl;
-        av_frame_ref(sw_frame, frame);
-        return;
+        // av_frame_ref(sw_frame, frame);
+        return false;
     }
+
+    av_frame_unref(frame);
 
     width = sw_frame->width;
     height = sw_frame->height;
 
     sws_ctx = sws_getCachedContext(
-        sws_ctx, // nullptr,
+        sws_ctx,
         sw_frame->width, sw_frame->height, (AVPixelFormat)sw_frame->format,
         sw_frame->width, sw_frame->height, AV_PIX_FMT_ARGB,
         SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
     if (!sws_ctx) {
         std::cerr << "Failed to get SwsContext" << std::endl;
-        return;
+        return false;
     }
 
-    int num_bytes = av_image_get_buffer_size(AV_PIX_FMT_ARGB, width, height, 1);
-    decoded_buffer.resize(num_bytes);
-
+    decoded_buffer.resize(4 * sw_frame->width * sw_frame->height);
     uint8_t* dst_data[4] = { decoded_buffer.data(), nullptr, nullptr, nullptr };
-    int dst_linesize[4] = { 4 * width, 0, 0, 0 };
+    int dst_linesize[4] = { 4 * sw_frame->width, 0, 0, 0 };
 
     ret = sws_scale(
         sws_ctx,
         sw_frame->data,
         sw_frame->linesize,
         0,
-        height,
+        sw_frame->height,
         dst_data,
         dst_linesize);
 
     if (ret < 0) {
         std::cerr << "Failed to sws_scale" << std::endl;
-        return;
+        return false;
     }
+    av_frame_unref(sw_frame);
+    return true;
 };

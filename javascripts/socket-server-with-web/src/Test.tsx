@@ -21,7 +21,6 @@ export const Test: React.FC = () => {
     if (!dataChannel) return;
     dataChannel.onmessage = (event) => {
       const msg = JSON.parse(event.data) as DataChannelMessage;
-
       setMessages((prev) => [
         ...prev,
         {
@@ -30,7 +29,6 @@ export const Test: React.FC = () => {
           timestamp: msg.timestamp ?? Date.now(),
         },
       ]);
-      console.log("remote--message:", event.data);
     };
   }, [dataChannel]);
 
@@ -123,7 +121,6 @@ export const Test: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault();
       // const dataChannel = dcRef.current;
-
       // const dataChannel = dcRef.current;
       if (!webRTCConnection || !webRTCConnection.dc) {
         console.warn("DataChannel is not open, cannot send message.");
